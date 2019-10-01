@@ -26,7 +26,7 @@ class MoviesController < ApplicationController
 
 
     #populates the possible rating enumerations
-    @all_ratings = Movie.get_ratings;
+    @all_ratings = Movie.get_ratings.keys
 
     #if first session, want to populate session with all checkboxes
     if not session[:ratings]
