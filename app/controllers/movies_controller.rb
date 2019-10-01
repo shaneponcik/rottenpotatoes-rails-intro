@@ -11,32 +11,59 @@ class MoviesController < ApplicationController
   end
 
   def index
+    #want to process the params to store in session
+    # then want to process session to create index page
+    # also: if all checkboxes are left empty, don't update session
+    #
+    # param changes:
+    #   changes in checkbox
+    #     params: assortment of params checked
+    #   changes in sorting
+    #     params: title, date, none
+    #
+    # if uri is lacking sorting and checkbox information, will redirect to new uri with these parameters filled out
+    # uri: checkboxes & sort
+
+
+    #populates the possible rating enumerations
     @all_ratings = Movie.get_ratings;
+
+    #if first session, want to populate session with all checkboxes
+    if not session[:ratings]
+      session[:ratings] = @all_ratings
+    end
+    #if first session ,want to set session to no sort
+    if not session[:sort]
+      session[:sort] = "none"
+    end
+
+    #session stores new configuration if so
+    if(params[:sort])
+      session[:sort] = params[:sort]
+    end
+    if(params[:ratings])
+      session[:ratings] = params[:ratings]
+    end
+
+    if(not params[:sort] or not params[:ratings])
+      flash.keep
+      redirect_to movies_path :sort => session[:sort], :ratings => session[:ratings]
+    end
 
     #filter by ratings
     # want to then repopulate the filter options from selected ratings, if not(then first visit and populate all)
-    selected_ratings = params[:ratings]
-    if(selected_ratings)
-      movies = Movie.with_ratings(selected_ratings.keys)
-      @rating_checks = selected_ratings.keys
-    else
-      movies = Movie.with_ratings(@all_ratings)
-      @rating_checks = @all_ratings
-    end
+    @movies = Movie.with_ratings(session[:ratings].keys)
+    @rating_checks = session[:ratings].keys
 
     #movie ordering
-    movies_order = params[:movies_order]
-    if(movies_order)
-      if(movies_order == "asc_title")
-        movies = Movie.order(:title)
-        @highlight_movie = "hilite"
-      elsif (movies_order == "asc_release")
-        movies = Movie.order(:release_date)
-        @highlight_date = "hilite"
-      end
+    movies_order = session[:sort]
+    if(movies_order == "title")
+      @movies = @movies.order(:title)
+      @highlight_movie = "hilite"
+    elsif (movies_order == "date")
+      @movies = @movies.order(:release_date)
+      @highlight_date = "hilite"
     end
-
-    @movies = movies
   end
 
   def new
