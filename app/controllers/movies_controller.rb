@@ -11,18 +11,32 @@ class MoviesController < ApplicationController
   end
 
   def index
+    @all_ratings = Movie.get_ratings;
+
+    #filter by ratings
+    # want to then repopulate the filter options from selected ratings, if not(then first visit and populate all)
+    selected_ratings = params[:ratings]
+    if(selected_ratings)
+      movies = Movie.with_ratings(selected_ratings.keys)
+      @rating_checks = selected_ratings.keys
+    else
+      movies = Movie.with_ratings(@all_ratings)
+      @rating_checks = @all_ratings
+    end
+
+    #movie ordering
     movies_order = params[:movies_order]
     if(movies_order)
       if(movies_order == "asc_title")
-        @movies = Movie.order(:title)
+        movies = Movie.order(:title)
         @highlight_movie = "hilite"
       elsif (movies_order == "asc_release")
-        @movies = Movie.order(:release_date)
+        movies = Movie.order(:release_date)
         @highlight_date = "hilite"
       end
-    else
-      @movies = Movie.all
     end
+
+    @movies = movies
   end
 
   def new
