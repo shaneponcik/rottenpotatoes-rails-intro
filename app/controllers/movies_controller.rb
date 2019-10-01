@@ -30,7 +30,7 @@ class MoviesController < ApplicationController
 
     #if first session, want to populate session with all checkboxes
     if not session[:ratings]
-      session[:ratings] = @all_ratings
+      session[:ratings] = Movie.get_ratings
     end
     #if first session ,want to set session to no sort
     if not session[:sort]
